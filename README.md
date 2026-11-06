@@ -190,3 +190,14 @@ GitHub: [FlaviaNdahiro](https://github.com/FlaviaNdahiro)
 ---
 
 *Ikirere* means *weather* in Kinyarwanda.
+
+
+
+## Temperature Unit Settings
+
+Ikirere CLI supports Celsius and Fahrenheit.
+
+Show the current temperature unit:
+
+```bash
+node src/index.js settings units
