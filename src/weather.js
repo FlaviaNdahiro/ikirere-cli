@@ -20,3 +20,24 @@ export async function getCityCoordinates(city) {
     longitude: data.results[0].longitude
   };
 }
+
+export async function getCurrentWeather(latitude, longitude) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=auto`;
+
+  const response = await fetch(url);
+
+  if (!response.ok) {
+    throw new Error("Could not connect to the weather service.");
+  }
+
+  const data = await response.json();
+
+  return {
+    temperature: data.current.temperature_2m,
+    humidity: data.current.relative_humidity_2m,
+    feelsLike: data.current.apparent_temperature,
+    weatherCode: data.current.weather_code,
+    windSpeed: data.current.wind_speed_10m,
+    time: data.current.time
+  };
+}
