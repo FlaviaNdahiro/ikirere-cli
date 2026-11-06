@@ -1,4 +1,5 @@
-#!/usr/bin/env node
+
+
 import { parseArgs } from "node:util";
 import chalk from "chalk";
 
@@ -12,7 +13,9 @@ import {
   addFavorite,
   removeFavorite,
   addHistory,
-  getHistory
+  getHistory,
+  getSettings,
+  updateUnits
 } from "./storage.js";
 
 const { values, positionals } = parseArgs({
@@ -34,6 +37,8 @@ async function main() {
     console.log("  favorite list           Show favorite cities");
     console.log("  favorite remove <city>  Remove a favorite city");
     console.log("  history                 Show recent searches");
+    console.log("  settings units <unit>   Change temperature units");
+    console.log("  settings units          Show current temperature unit");
     console.log("  --help                  Show help");
     console.log("  --version               Show version");
     return;
@@ -60,6 +65,7 @@ async function main() {
     console.log(chalk.yellow("Getting weather information..."));
 
     const city = await getCityCoordinates(cityName);
+
     const weather = await getCurrentWeather(
       city.latitude,
       city.longitude
@@ -67,14 +73,30 @@ async function main() {
 
     await addHistory(city.name);
 
+    const settings = await getSettings();
+
+    const unit =
+      settings.units === "fahrenheit" ? "°F" : "°C";
+
+    const temperature =
+      settings.units === "fahrenheit"
+        ? (weather.temperature * 9) / 5 + 32
+        : weather.temperature;
+
+    const feelsLike =
+      settings.units === "fahrenheit"
+        ? (weather.feelsLike * 9) / 5 + 32
+        : weather.feelsLike;
+
     console.log(chalk.green("\nCurrent Weather"));
     console.log("----------------------");
     console.log("City:", city.name);
-    console.log("Temperature:", weather.temperature, "°C");
+    console.log("Temperature:", temperature.toFixed(1), unit);
     console.log("Humidity:", weather.humidity, "%");
-    console.log("Feels like:", weather.feelsLike, "°C");
+    console.log("Feels like:", feelsLike.toFixed(1), unit);
     console.log("Wind speed:", weather.windSpeed, "km/h");
     console.log("Time:", weather.time);
+
     return;
   }
 
@@ -115,7 +137,33 @@ async function main() {
       return;
     }
 
-    throw new Error("Use favorite add, favorite list, or favorite remove.");
+    throw new Error(
+      "Use favorite add, favorite list, or favorite remove."
+    );
+  }
+
+  if (command === "settings") {
+    const action = args[0];
+    const unit = args[1];
+
+    if (action === "units") {
+      if (!unit) {
+        const settings = await getSettings();
+        console.log("Current temperature unit:", settings.units);
+        return;
+      }
+
+      await updateUnits(unit);
+
+      console.log(
+        chalk.green(`Temperature unit changed to ${unit}.`)
+      );
+      return;
+    }
+
+    throw new Error(
+      "Use settings units celsius or settings units fahrenheit."
+    );
   }
 
   if (command === "history") {
@@ -131,10 +179,13 @@ async function main() {
     history.forEach(item => {
       console.log("-", item.city, "|", item.searchedAt);
     });
+
     return;
   }
 
-  throw new Error(`Unknown command: ${command}. Type --help for help.`);
+  throw new Error(
+    `Unknown command: ${command}. Type --help for help.`
+  );
 }
 
 main().catch(error => {
