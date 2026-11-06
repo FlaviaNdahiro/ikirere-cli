@@ -1,0 +1,30 @@
+
+{
+  "name": "ikirere-cli",
+  "version": "1.0.0",
+  "description": "A command-line weather application",
+  "type": "module",
+  "main": "src/index.js",
+  "bin": {
+    "ikirere": "./src/index.js"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "weather",
+    "cli",
+    "ikirere"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^6.0.1",
+    "ora": "^10.0.0"
+  }
+}
